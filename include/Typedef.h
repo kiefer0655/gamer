@@ -96,6 +96,9 @@ const TestProbID_t
    TESTPROB_HYDRO_GRACKLE_TEST                 =   24,
    TESTPROB_HYDRO_BARRED_POT                   =   51,
    TESTPROB_HYDRO_JET_ICM_WALL                 =   52,
+
+   TESTPROB_HYDRO_MY_BLAST_WAVE                =   53,
+   
    TESTPROB_HYDRO_CDM_LSS                      =  100,
    TESTPROB_HYDRO_ZELDOVICH                    =  101,
    TESTPROB_HYDRO_GRACKLE_COMOVING             =  102,
