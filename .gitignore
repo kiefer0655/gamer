@@ -15,3 +15,5 @@ GAMER_ExtractProfile
 src/Makefile
 src/Makefile.log
 src/.local_settings
+
+tool/venv/
