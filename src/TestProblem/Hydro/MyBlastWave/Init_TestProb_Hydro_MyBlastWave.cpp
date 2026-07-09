@@ -8,7 +8,9 @@ static double Blast_Dens_Bg;        // background mass density
 static double Blast_Pres_Bg;        // background pressure
 static double Blast_Pres_Exp;       // explosion pressure
 static double Blast_Radius;         // explosion radius
-static double Blast_Center[3];      // explosion center
+static double Blast_Center_1[3];      // explosion center
+static double Blast_Center_2[3];      // explosion center
+static double Blast_Center_3[3];      // explosion center
 #ifdef MHD
 static double Blast_BField;         // magnetic field strength along the diagonal direction
        double Blast_ResetB_amp;     // amplitude (for resetting magnetic field)
@@ -116,10 +118,20 @@ void LoadInputTestProb( const LoadParaMode_t load_mode, ReadPara_t *ReadPara, HD
    LOAD_PARA( load_mode, "Blast_Pres_Bg",        &Blast_Pres_Bg,         -1.0,          Eps_double,       NoMax_double      );
    LOAD_PARA( load_mode, "Blast_Pres_Exp",       &Blast_Pres_Exp,        -1.0,          Eps_double,       NoMax_double      );
    LOAD_PARA( load_mode, "Blast_Radius",         &Blast_Radius,          -1.0,          Eps_double,       NoMax_double      );
-   LOAD_PARA( load_mode, "Blast_Center_X",       &Blast_Center[0],       -1.0,          NoMin_double,     amr->BoxSize[0]   );
-   LOAD_PARA( load_mode, "Blast_Center_Y",       &Blast_Center[1],       -1.0,          NoMin_double,     amr->BoxSize[1]   );
-   LOAD_PARA( load_mode, "Blast_Center_Z",       &Blast_Center[2],       -1.0,          NoMin_double,     amr->BoxSize[2]   );
-#  ifdef MHD
+   LOAD_PARA( load_mode, "Blast_Center_1_X",     &Blast_Center_1[0],     -1.0,          NoMin_double,     amr->BoxSize[0]   );
+   LOAD_PARA( load_mode, "Blast_Center_1_Y",     &Blast_Center_1[1],     -1.0,          NoMin_double,     amr->BoxSize[1]   );
+   LOAD_PARA( load_mode, "Blast_Center_1_Z",     &Blast_Center_1[2],     -1.0,          NoMin_double,     amr->BoxSize[2]   );
+   
+   LOAD_PARA( load_mode, "Blast_Center_2_X",     &Blast_Center_2[0],       -1.0,          NoMin_double,     amr->BoxSize[0]   );
+   LOAD_PARA( load_mode, "Blast_Center_2_Y",     &Blast_Center_2[1],       -1.0,          NoMin_double,     amr->BoxSize[1]   );
+   LOAD_PARA( load_mode, "Blast_Center_2_Z",     &Blast_Center_2[2],       -1.0,          NoMin_double,     amr->BoxSize[2]   );
+
+   LOAD_PARA( load_mode, "Blast_Center_3_X",     &Blast_Center_3[0],       -1.0,          NoMin_double,     amr->BoxSize[0]   );
+   LOAD_PARA( load_mode, "Blast_Center_3_Y",     &Blast_Center_3[1],       -1.0,          NoMin_double,     amr->BoxSize[1]   );
+   LOAD_PARA( load_mode, "Blast_Center_3_Z",     &Blast_Center_3[2],       -1.0,          NoMin_double,     amr->BoxSize[2]   );
+
+
+   #  ifdef MHD
    LOAD_PARA( load_mode, "Blast_BField",         &Blast_BField,           5.0e-2,       NoMin_double,     NoMax_double      );
    LOAD_PARA( load_mode, "Blast_ResetB_amp",     &Blast_ResetB_amp,       1.0e2,        0.0,              NoMax_double      );
    LOAD_PARA( load_mode, "Blast_ResetB_r0",      &Blast_ResetB_r0,        1.0e-2,       Eps_double,       NoMax_double      );
@@ -165,9 +177,11 @@ void SetParameter()
    delete ReadPara;
 
 // set the default explosion center
-   for (int d=0; d<3; d++)
-      if ( Blast_Center[d] < 0.0 )  Blast_Center[d] = 0.5*amr->BoxSize[d];
-
+   for (int d=0; d<3; d++){
+      if ( Blast_Center_1[d] < 0.0 )  Blast_Center_1[d] = 0.5*amr->BoxSize[d];
+      if ( Blast_Center_2[d] < 0.0 )  Blast_Center_2[d] = 0.5*amr->BoxSize[d];
+      if ( Blast_Center_3[d] < 0.0 )  Blast_Center_3[d] = 0.5*amr->BoxSize[d];
+   }
 
 // (2) set the problem-specific derived parameters
 
@@ -205,8 +219,8 @@ void SetParameter()
       Aux_Message( stdout, "  explosion pressure        = %13.7e\n", Blast_Pres_Exp );
       Aux_Message( stdout, "  total explosion energy    = %13.7e (assuming constant-gamma EoS)\n", ExpEngy );
       Aux_Message( stdout, "  explosion radius          = %13.7e\n", Blast_Radius );
-      Aux_Message( stdout, "  explosion center          = (%13.7e, %13.7e, %13.7e)\n", Blast_Center[0], Blast_Center[1],
-                                                                                       Blast_Center[2] );
+      Aux_Message( stdout, "  explosion center          = (%13.7e, %13.7e, %13.7e)\n", Blast_Center_1[0], Blast_Center_1[1],
+                                                                                       Blast_Center_1[2] );
 #     ifdef MHD
       Aux_Message( stdout, "  magnetic field strength   = %13.7e\n", Blast_BField );
       Aux_Message( stdout, "  resetting magnetic field  = %d\n",     OPT__RESET_FLUID );
@@ -251,11 +265,14 @@ void SetGridIC( real fluid[], const double x, const double y, const double z, co
                 const int lv, double AuxArray[] )
 {
 
-   const double r = SQRT( SQR(x-Blast_Center[0]) + SQR(y-Blast_Center[1]) + SQR(z-Blast_Center[2]) );
+   const double r_1 = SQRT( SQR(x-Blast_Center_1[0]) + SQR(y-Blast_Center_1[1]) + SQR(z-Blast_Center_1[2]) );
+   const double r_2 = SQRT( SQR(x-Blast_Center_2[0]) + SQR(y-Blast_Center_2[1]) + SQR(z-Blast_Center_2[2]) );
+   const double r_3 = SQRT( SQR(x-Blast_Center_3[0]) + SQR(y-Blast_Center_3[1]) + SQR(z-Blast_Center_3[2]) );
+   
    double Dens, MomX, MomY, MomZ, Pres, Eint, Etot;
 
    Dens = Blast_Dens_Bg;
-   Pres = ( r <= Blast_Radius ) ? Blast_Pres_Exp : Blast_Pres_Bg;
+   Pres = ( r_1 <= Blast_Radius or r_2 <= Blast_Radius or r_3 <= Blast_Radius  ) ? Blast_Pres_Exp : Blast_Pres_Bg;
 #  ifdef SRHD
    real Prim[NCOMP_TOTAL];
    Prim[0] = Dens;
