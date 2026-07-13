@@ -18,7 +18,7 @@
 cd $PBS_O_WORKDIR
 
 # ===== Run GAMER =====
-mpirun -map-by ppr:16:socket:pe=1 ./YOUR_EXECUTABLE 1>>stdout 2>>stderr
+mpirun -map-by ppr:16:socket:pe=1 ./gamer 1>>stdout 2>>stderr
 
 
 # log output and error with
