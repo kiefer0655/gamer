@@ -17,3 +17,5 @@ src/Makefile.log
 src/.local_settings
 
 tool/venv/
+
+Segue1/ParticleEquilibriumIC/Run_output/

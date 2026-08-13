@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+# for indexed photo, use image%03d.png where %03d is the padded numbers ie image001.png
+
 import argparse
 import subprocess
 from pathlib import Path
